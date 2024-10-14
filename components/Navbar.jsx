@@ -23,7 +23,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-[#60b8b2] shadow-md sticky z-50 top-0">
+    <nav className="bg-white shadow-md sticky z-50 top-0">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo and brand name */}
@@ -37,7 +37,7 @@ const Navbar = () => {
                 className="h-8"
                 alt="FluxStore Logo"
               />
-              <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">
+              <span className="self-center text-2xl font-semibold whitespace-nowrap text-black">
                 Coffee&Beans
               </span>
             </Link>
@@ -49,19 +49,19 @@ const Navbar = () => {
               {/* Navigation links */}
               <Link
                 href="/"
-                className="text-white hover:bg-[#95d7d2] hover:text-white block px-3 py-1 rounded-md text-base font-medium md:m-0"
+                className="text-black hover:bg-gray-100 hover:text-black block px-3 py-1 rounded-md text-base font-medium md:m-0"
               >
                 Home
               </Link>
               <Link
                 href="/about"
-                className="text-white hover:bg-[#95d7d2] hover:text-white block px-3 py-1 rounded-md text-base font-medium md:m-0"
+                className="text-black hover:bg-gray-100 hover:text-black block px-3 py-1 rounded-md text-base font-medium md:m-0"
               >
                 About
               </Link>
               <Link
                 href="/contact"
-                className="text-white hover:bg-[#95d7d2] hover:text-white block px-3 py-1 rounded-md text-base font-medium md:m-0"
+                className="text-black hover:bg-gray-100 hover:text-black block px-3 py-1 rounded-md text-base font-medium md:m-0"
               >
                 Contact
               </Link>
@@ -69,7 +69,7 @@ const Navbar = () => {
               {/* Cart icon */}
               <Link
                 href="/cart"
-                className="p-2 rounded-lg text-white hover:bg-[#95d7d2] focus:outline-none"
+                className="p-2 rounded-lg text-black hover:bg-gray-100 focus:outline-none"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,7 @@ const Navbar = () => {
               {/* Account icon */}
               <Link
                 href="/account"
-                className="ml-3 p-2 rounded-lg text-white hover:bg-[#95d7d2] focus:outline-none"
+                className="ml-3 p-2 rounded-lg text-black hover:bg-gray-100 focus:outline-none"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +114,7 @@ const Navbar = () => {
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-black focus:outline-none"
             >
               {isOpen ? (
                 <svg
@@ -159,19 +159,19 @@ const Navbar = () => {
             {/* Mobile navigation links */}
             <Link
               href="/"
-              className="text-white hover:bg-[#95d7d2] hover:text-white block px-3 py-1 rounded-md text-base font-medium md:m-0"
+              className="text-black hover:bg-gray-100 hover:text-black block px-3 py-1 rounded-md text-base font-medium md:m-0"
             >
               Home
             </Link>
             <Link
               href="/about"
-              className="text-white hover:bg-[#95d7d2] hover:text-white block px-3 py-1 rounded-md text-base font-medium md:m-0"
+              className="text-black hover:bg-gray-100 hover:text-black block px-3 py-1 rounded-md text-base font-medium md:m-0"
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="text-white hover:bg-[#95d7d2] hover:text-white block px-3 py-1 rounded-md text-base font-medium md:m-0"
+              className="text-black hover:bg-gray-100 hover:text-black block px-3 py-1 rounded-md text-base font-medium md:m-0"
             >
               Contact
             </Link>
@@ -181,7 +181,7 @@ const Navbar = () => {
               {/* Mobile cart icon */}
               <Link
                 href="/cart"
-                className="p-2 rounded-lg text-white hover:bg-[#95d7d2] focus:outline-none"
+                className="p-2 rounded-lg text-black hover:bg-gray-100 focus:outline-none"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +201,7 @@ const Navbar = () => {
               {/* Mobile account icon */}
               <Link
                 href="/account"
-                className="ml-auto p-2 rounded-lg text-white hover:bg-[#95d7d2] focus:outline-none"
+                className="ml-auto p-2 rounded-lg text-black hover:bg-gray-100 focus:outline-none"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
