@@ -44,7 +44,7 @@ export default function Error({ error, reset }) {
             transition={{ delay: 0.6, duration: 0.5 }}
           >
             Oops! Looks like our coffee machine couldnt brew this page.
-            Dont worry, we're working on it. In the meantime, why not
+            Dont worry, were working on it. In the meantime, why not
             try returning to our homepage?
           </motion.p>
           <motion.div
