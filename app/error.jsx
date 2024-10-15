@@ -41,7 +41,7 @@ export default function Error({ error }) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
           >
-            Don't worry, we're brewing up a solution. In the meantime, why not
+            Dont worry, were brewing up a solution. In the meantime, why not
             try returning to our homepage?
           </motion.p>
           <motion.div
