@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 /**
  * @component Navbar
@@ -32,7 +33,9 @@ const Navbar = () => {
               href="/"
               className="flex items-center space-x-3 rtl:space-x-reverse"
             >
-              <img
+              <Image
+                width={100}
+                height={100}
                 src="/coffee&beans.svg"
                 className="h-8"
                 alt="FluxStore Logo"
