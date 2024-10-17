@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { X, Plus, Minus, Trash2 } from "lucide-react";
 import Alert from "@/components/Alert";
+import Image from "next/image";
 
 const ShoppingCartModal = ({ isOpen, onClose }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -24,44 +25,67 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
     type: "success",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const unsubscribeRef = useRef(null);
+
+  // Reset alert when modal is opened or closed
+  useEffect(() => {
+    if (!isOpen) {
+      setAlertConfig({
+        isVisible: false,
+        message: "",
+        type: "success",
+      });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      if (user) {
-        // Setup real-time listener for cart items
-        const q = query(
-          collection(db, "cart"),
-          where("userId", "==", user.uid)
-        );
-        const unsubscribeCart = onSnapshot(
-          q,
-          (snapshot) => {
-            const items = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            setCartItems(items);
-          },
-          (error) => {
-            console.error("Error fetching cart items:", error);
-            setAlertConfig({
-              isVisible: true,
-              message: "Error loading cart items",
-              type: "error",
-            });
-          }
-        );
+    let unsubscribeAuth = () => {};
 
-        // Cleanup listener when user changes
-        return () => unsubscribeCart();
-      } else {
-        setCartItems([]);
+    if (isOpen) {
+      unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        setUser(user);
+        if (user) {
+          // Setup real-time listener for cart items
+          const q = query(
+            collection(db, "cart"),
+            where("userId", "==", user.uid)
+          );
+
+          const unsubscribeCart = onSnapshot(
+            q,
+            (snapshot) => {
+              const items = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              setCartItems(items);
+            },
+            (error) => {
+              console.error("Error fetching cart items:", error);
+              setAlertConfig({
+                isVisible: true,
+                message: "Error loading cart items",
+                type: "error",
+              });
+            }
+          );
+
+          // Store unsubscribe function in ref
+          unsubscribeRef.current = unsubscribeCart;
+        } else {
+          setCartItems([]);
+        }
+      });
+    }
+
+    // Cleanup function
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -79,6 +103,22 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
+  const showAlert = (message, type = "success") => {
+    setAlertConfig({
+      isVisible: true,
+      message,
+      type,
+    });
+
+    // Auto-hide alert after 3 seconds
+    setTimeout(() => {
+      setAlertConfig((prev) => ({
+        ...prev,
+        isVisible: false,
+      }));
+    }, 3000);
+  };
+
   const updateQuantity = async (itemId, newQuantity) => {
     if (!user || isLoading) return;
 
@@ -89,19 +129,11 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
       } else {
         const cartItemRef = doc(db, "cart", itemId);
         await updateDoc(cartItemRef, { quantity: newQuantity });
-        setAlertConfig({
-          isVisible: true,
-          message: "Cart updated successfully",
-          type: "success",
-        });
+        showAlert("Cart updated successfully");
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
-      setAlertConfig({
-        isVisible: true,
-        message: "Error updating cart",
-        type: "error",
-      });
+      showAlert("Error updating cart", "error");
     } finally {
       setIsLoading(false);
     }
@@ -118,21 +150,13 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
       // Verify the item was deleted by checking if it still exists in cartItems
       const updatedItems = cartItems.filter((item) => item.id !== itemId);
       if (updatedItems.length !== cartItems.length) {
-        setAlertConfig({
-          isVisible: true,
-          message: "Item removed from cart",
-          type: "success",
-        });
+        showAlert("Item removed from cart");
       } else {
         throw new Error("Failed to remove item");
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      setAlertConfig({
-        isVisible: true,
-        message: "Error removing item",
-        type: "error",
-      });
+      showAlert("Error removing item", "error");
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +170,7 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
       <Alert
         isVisible={alertConfig.isVisible}
         message={alertConfig.message}
@@ -157,9 +181,7 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
       />
       <div
         ref={modalRef}
-        className={`fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-lg transform transition-transform duration-300 ease-in-out translate-x-0"
       >
         <div className="flex flex-col h-full">
           <div className="p-6">
@@ -168,6 +190,7 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
               <button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-700"
+                aria-label="Close cart"
               >
                 <X />
               </button>
@@ -182,8 +205,17 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between mb-4"
+                    className="flex items-center justify-between mb-4 gap-4"
                   >
+                    <div className="w-24 h-24 relative">
+                      <Image
+                        src={item.image_url}
+                        alt={item.name}
+                        fill
+                        sizes="96px"
+                        className="object-contain rounded-md"
+                      />
+                    </div>
                     <div className="flex-grow">
                       <p className="font-semibold">{item.name}</p>
                       <p className="text-gray-600">${item.price.toFixed(2)}</p>
@@ -194,9 +226,8 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                           updateQuantity(item.id, item.quantity - 1)
                         }
                         disabled={isLoading}
-                        className={`p-1 bg-gray-200 rounded-full hover:bg-gray-300 ${
-                          isLoading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`p-1 bg-gray-200 rounded-full hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                        aria-label="Decrease quantity"
                       >
                         <Minus size={16} />
                       </button>
@@ -206,18 +237,16 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                           updateQuantity(item.id, item.quantity + 1)
                         }
                         disabled={isLoading}
-                        className={`p-1 bg-gray-200 rounded-full hover:bg-gray-300 ${
-                          isLoading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`p-1 bg-gray-200 rounded-full hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                        aria-label="Increase quantity"
                       >
                         <Plus size={16} />
                       </button>
                       <button
                         onClick={() => deleteProduct(item.id)}
                         disabled={isLoading}
-                        className={`p-1 bg-red-200 rounded-full text-red-600 hover:bg-red-300 ${
-                          isLoading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`p-1 bg-red-200 rounded-full text-red-600 hover:bg-red-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                        aria-label="Remove item"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -236,9 +265,7 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                 </p>
               </div>
               <button
-                className={`w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 Checkout
