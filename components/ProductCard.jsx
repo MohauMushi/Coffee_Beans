@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
@@ -13,8 +13,9 @@ import {
   getDocs,
   query,
   where,
+  deleteDoc,  // Added this import
 } from "firebase/firestore";
-import Alert from "@/components/Alert";
+import Alert from "@/components/Alert"
 
 export default function ProductCard({ product }) {
   const { user } = useUser();
@@ -23,6 +24,7 @@ export default function ProductCard({ product }) {
     message: "",
     type: "success",
   });
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   if (!product) {
     return null;
@@ -30,9 +32,76 @@ export default function ProductCard({ product }) {
 
   const { id, name, image_url, price, weight, flavor_profile = [] } = product;
 
-  const handleHeartClick = (e) => {
+  useEffect(() => {
+    if (user) {
+      const checkWishlistStatus = async () => {
+        const q = query(
+          collection(db, "wishlist"),
+          where("userId", "==", user.uid),
+          where("productId", "==", id)
+        );
+        const querySnapshot = await getDocs(q);
+        setIsInWishlist(!querySnapshot.empty);
+      };
+      checkWishlistStatus();
+    } else {
+      setIsInWishlist(false);
+    }
+  }, [user, id]);
+
+  const handleHeartClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!user) {
+      setAlertConfig({
+        isVisible: true,
+        message: "Please log in to add items to wishlist",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const wishlistRef = collection(db, "wishlist");
+      const q = query(
+        wishlistRef,
+        where("userId", "==", user.uid),
+        where("productId", "==", id)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        await addDoc(wishlistRef, {
+          userId: user.uid,
+          productId: id,
+          name,
+          price,
+          image_url,
+        });
+        setIsInWishlist(true);
+        setAlertConfig({
+          isVisible: true,
+          message: "Item added to wishlist",
+          type: "success",
+        });
+      } else {
+        const docRef = querySnapshot.docs[0].ref;
+        await deleteDoc(docRef);
+        setIsInWishlist(false);
+        setAlertConfig({
+          isVisible: true,
+          message: "Item removed from wishlist",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      setAlertConfig({
+        isVisible: true,
+        message: "Error updating wishlist",
+        type: "error",
+      });
+    }
   };
 
   const handleAddToCart = async () => {
@@ -99,21 +168,24 @@ export default function ProductCard({ product }) {
           <div className="absolute top-2 right-2 rounded-full z-10 bg-slate-50">
             <button
               onClick={handleHeartClick}
-              className="p-2 rounded-full transition-colors duration-300 bg-opacity-50 hover:bg-opacity-100"
+              className="p-2 rounded-full transition-colors duration-300 hover:bg-gray-100"
+              aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
             >
               <svg
-                className="h-6 w-6 text-gray-600 hover:text-red-500 hover:fill-red-500"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
+                className={`h-6 w-6 transition-colors duration-300 ${
+                  isInWishlist 
+                    ? "text-red-500 fill-red-500" 
+                    : "text-gray-400 hover:text-red-500"
+                }`}
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                strokeWidth={isInWishlist ? "0" : "2"}
+                fill={isInWishlist ? "currentColor" : "none"}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z"
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
                 />
               </svg>
             </button>
