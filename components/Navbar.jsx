@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { ShoppingCart, User, ChevronDown } from "lucide-react";
+import { ShoppingCart, User, ChevronDown, Heart } from "lucide-react";
 import ShoppingCartModal from "./ShoppingCartModal";
 import { auth, db, signOut } from "@/lib/firebaseConfig";
 import Alert from "@/components/Alert";
@@ -22,6 +22,7 @@ const Navbar = () => {
     message: "",
     type: "success",
   });
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -56,6 +57,22 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  //UseEffect to track the wishlist count
+  useEffect(() => {
+    if (user) {
+      const q = query(
+        collection(db, "wishlist"),
+        where("userId", "==", user.uid)
+      );
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        setWishlistCount(snapshot.docs.length);
+      });
+      return () => unsubscribe();
+    } else {
+      setWishlistCount(0);
+    }
+  }, [user]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -201,11 +218,33 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+            <Link
+              href="/wishlist"
+              className="relative p-2 text-black hover:bg-gray-100 rounded-full focus:outline-none"
+            >
+              <Heart size={24} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
             <UserMenu />
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
+            <Link
+              href="/wishlist"
+              className="p-2 text-black rounded-md hover:bg-gray-100 focus:outline-none mr-2 relative"
+            >
+              <Heart size={24} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
             <button
               onClick={() => setIsCartOpen(true)}
               className="p-2 text-black rounded-md hover:bg-gray-100 focus:outline-none mr-2 relative"
