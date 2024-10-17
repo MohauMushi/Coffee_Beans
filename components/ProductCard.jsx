@@ -60,6 +60,7 @@ export default function ProductCard({ product }) {
           productId: id,
           name,
           price,
+          image_url,
           quantity: 1,
         });
       } else {
