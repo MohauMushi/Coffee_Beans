@@ -6,10 +6,10 @@ import {
   collection,
   query,
   where,
-  getDocs,
   updateDoc,
   doc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { X, Plus, Minus, Trash2 } from "lucide-react";
 import Alert from "@/components/Alert";
@@ -23,12 +23,40 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
     message: "",
     type: "success",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       if (user) {
-        fetchCartItems(user.uid);
+        // Setup real-time listener for cart items
+        const q = query(
+          collection(db, "cart"),
+          where("userId", "==", user.uid)
+        );
+        const unsubscribeCart = onSnapshot(
+          q,
+          (snapshot) => {
+            const items = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setCartItems(items);
+          },
+          (error) => {
+            console.error("Error fetching cart items:", error);
+            setAlertConfig({
+              isVisible: true,
+              message: "Error loading cart items",
+              type: "error",
+            });
+          }
+        );
+
+        // Cleanup listener when user changes
+        return () => unsubscribeCart();
+      } else {
+        setCartItems([]);
       }
     });
 
@@ -51,25 +79,16 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
-  const fetchCartItems = async (userId) => {
-    const q = query(collection(db, "cart"), where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
-    const items = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setCartItems(items);
-  };
-
   const updateQuantity = async (itemId, newQuantity) => {
-    if (!user) return;
+    if (!user || isLoading) return;
 
+    setIsLoading(true);
     try {
       if (newQuantity <= 0) {
         await deleteProduct(itemId);
       } else {
-        await updateDoc(doc(db, "cart", itemId), { quantity: newQuantity });
-        fetchCartItems(user.uid);
+        const cartItemRef = doc(db, "cart", itemId);
+        await updateDoc(cartItemRef, { quantity: newQuantity });
         setAlertConfig({
           isVisible: true,
           message: "Cart updated successfully",
@@ -77,31 +96,45 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
         });
       }
     } catch (error) {
+      console.error("Error updating quantity:", error);
       setAlertConfig({
         isVisible: true,
         message: "Error updating cart",
         type: "error",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const deleteProduct = async (itemId) => {
-    if (!user) return;
+    if (!user || isLoading) return;
 
+    setIsLoading(true);
     try {
-      await deleteDoc(doc(db, "cart", itemId));
-      fetchCartItems(user.uid);
-      setAlertConfig({
-        isVisible: true,
-        message: "Item removed from cart",
-        type: "success",
-      });
+      const cartItemRef = doc(db, "cart", itemId);
+      await deleteDoc(cartItemRef);
+
+      // Verify the item was deleted by checking if it still exists in cartItems
+      const updatedItems = cartItems.filter((item) => item.id !== itemId);
+      if (updatedItems.length !== cartItems.length) {
+        setAlertConfig({
+          isVisible: true,
+          message: "Item removed from cart",
+          type: "success",
+        });
+      } else {
+        throw new Error("Failed to remove item");
+      }
     } catch (error) {
+      console.error("Error deleting product:", error);
       setAlertConfig({
         isVisible: true,
         message: "Error removing item",
         type: "error",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -160,7 +193,10 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity - 1)
                         }
-                        className="p-1 bg-gray-200 rounded-full hover:bg-gray-300"
+                        disabled={isLoading}
+                        className={`p-1 bg-gray-200 rounded-full hover:bg-gray-300 ${
+                          isLoading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <Minus size={16} />
                       </button>
@@ -169,13 +205,19 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity + 1)
                         }
-                        className="p-1 bg-gray-200 rounded-full hover:bg-gray-300"
+                        disabled={isLoading}
+                        className={`p-1 bg-gray-200 rounded-full hover:bg-gray-300 ${
+                          isLoading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <Plus size={16} />
                       </button>
                       <button
                         onClick={() => deleteProduct(item.id)}
-                        className="p-1 bg-red-200 rounded-full text-red-600 hover:bg-red-300"
+                        disabled={isLoading}
+                        className={`p-1 bg-red-200 rounded-full text-red-600 hover:bg-red-300 ${
+                          isLoading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -193,7 +235,12 @@ const ShoppingCartModal = ({ isOpen, onClose }) => {
                   Total: ${totalPrice.toFixed(2)}
                 </p>
               </div>
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+              <button
+                className={`w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoading}
+              >
                 Checkout
               </button>
             </div>
