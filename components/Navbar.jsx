@@ -17,7 +17,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const userMenuRef = useRef(null);
   const router = useRouter();
-  const [alertConfig, setAlertConfig] = useState({
+  const [navAlertConfig, setNavAlertConfig] = useState({
     isVisible: false,
     message: "",
     type: "success",
@@ -69,13 +69,13 @@ const Navbar = () => {
     try {
       await signOut(auth);
       router.push("/");
-      setAlertConfig({
+      setNavAlertConfig({
         isVisible: true,
         message: "Successfully signed out",
         type: "success",
       });
     } catch (error) {
-      setAlertConfig({
+      setNavAlertConfig({
         isVisible: true,
         message: "Error signing out",
         type: "error",
@@ -139,11 +139,11 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow-md sticky z-50 top-0">
       <Alert
-        isVisible={alertConfig.isVisible}
-        message={alertConfig.message}
-        type={alertConfig.type}
+        isVisible={navAlertConfig.isVisible}
+        message={navAlertConfig.message}
+        type={navAlertConfig.type}
         onClose={() =>
-          setAlertConfig((prev) => ({ ...prev, isVisible: false }))
+          setNavAlertConfig((prev) => ({ ...prev, isVisible: false }))
         }
       />
       <div className="px-4 sm:px-6 lg:px-8">
@@ -202,7 +202,7 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsCartOpen(true)}
-              className="p-2 text-black rounded-md hover:bg-gray-100 focus:outline-none mr-2"
+              className="p-2 text-black rounded-md hover:bg-gray-100 focus:outline-none mr-2 relative"
             >
               <ShoppingCart size={24} />
               {cartCount > 0 && (
