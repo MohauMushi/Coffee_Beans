@@ -4,15 +4,17 @@ import { useState, useEffect } from "react";
 import {
   collection,
   query,
+  addDoc,
   where,
   getDocs,
   deleteDoc,
   doc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebaseConfig";
 import { useUser } from "@/app/context/UserContext";
 import Image from "next/image";
-import { Trash2 } from "lucide-react";
+import { Trash2, ShoppingCart } from "lucide-react";
 import Alert from "@/components/Alert";
 
 export default function WishlistPage() {
@@ -77,6 +79,56 @@ export default function WishlistPage() {
     }
   };
 
+  const handleAddToCart = async (item) => {
+    if (!user) {
+      setAlertConfig({
+        isVisible: true,
+        message: "Please log in to add items to cart",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const cartRef = collection(db, "cart");
+      const q = query(
+        cartRef,
+        where("userId", "==", user.uid),
+        where("productId", "==", item.productId)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        await addDoc(cartRef, {
+          userId: user.uid,
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          image_url: item.image_url,
+          quantity: 1,
+        });
+      } else {
+        const docRef = querySnapshot.docs[0].ref;
+        await updateDoc(docRef, {
+          quantity: querySnapshot.docs[0].data().quantity + 1,
+        });
+      }
+
+      setAlertConfig({
+        isVisible: true,
+        message: "Item added to cart successfully",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      setAlertConfig({
+        isVisible: true,
+        message: "Error adding item to cart",
+        type: "error",
+      });
+    }
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -126,13 +178,22 @@ export default function WishlistPage() {
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{item.name}</h2>
                 <p className="text-gray-600 mb-4">${item.price.toFixed(2)}</p>
-                <button
-                  onClick={() => removeFromWishlist(item.id)}
-                  className="flex items-center justify-center w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                >
-                  <Trash2 size={16} className="mr-2" />
-                  Remove from Wishlist
-                </button>
+                <div className="p-4 flex justify-between m-2 rounded-lg shadow-inner">
+                  <button
+                    onClick={() => removeFromWishlist(item.id)}
+                    className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Remove from Wishlist
+                  </button>
+                  <button
+                    onClick={() => handleAddToCart(item)}
+                    className="flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-colors duration-300"
+                  >
+                    <ShoppingCart size={16} className="mr-2" />
+                    Add to Cart
+                  </button>
+                </div>
               </div>
             </div>
           ))}
