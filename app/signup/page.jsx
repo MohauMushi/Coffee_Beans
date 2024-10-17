@@ -11,7 +11,6 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({
     show: false,
@@ -31,8 +30,6 @@ const SignUp = () => {
       return;
     }
     setIsLoading(true);
-    setError("");
-
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       setAlert({
@@ -44,9 +41,13 @@ const SignUp = () => {
         router.push("/");
       }, 1000);
     } catch (error) {
+      let errorMessage = "An error occurred. Please try again.";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "Email already in use. Try another email.";
+      }
       setAlert({
         show: true,
-        message: error.message,
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -162,11 +163,6 @@ const SignUp = () => {
                   </svg>
                 )}
               </button>
-              {error && (
-                <div className="text-red-500 text-sm text-center mt-2">
-                  {error}
-                </div>
-              )}
               <div className="text-center text-sm mt-4">
                 <span className="text-gray-600">Already have an account?</span>
                 <Link
