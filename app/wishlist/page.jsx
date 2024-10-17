@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   collection,
   query,
@@ -27,16 +27,7 @@ export default function WishlistPage() {
     type: "success",
   });
 
-  useEffect(() => {
-    if (user) {
-      fetchWishlistItems();
-    } else {
-      setWishlistItems([]);
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  const fetchWishlistItems = async () => {
+  const fetchWishlistItems = useCallback(async () => {
     try {
       const q = query(
         collection(db, "wishlist"),
@@ -58,7 +49,16 @@ export default function WishlistPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWishlistItems();
+    } else {
+      setWishlistItems([]);
+      setIsLoading(false);
+    }
+  }, [user, fetchWishlistItems]);
 
   const removeFromWishlist = async (itemId) => {
     try {

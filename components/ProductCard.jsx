@@ -13,9 +13,9 @@ import {
   getDocs,
   query,
   where,
-  deleteDoc,  // Added this import
+  deleteDoc,
 } from "firebase/firestore";
-import Alert from "@/components/Alert"
+import Alert from "@/components/Alert";
 
 export default function ProductCard({ product }) {
   const { user } = useUser();
@@ -26,28 +26,31 @@ export default function ProductCard({ product }) {
   });
   const [isInWishlist, setIsInWishlist] = useState(false);
 
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      if (!user || !product) return;
+
+      try {
+        const q = query(
+          collection(db, "wishlist"),
+          where("userId", "==", user.uid),
+          where("productId", "==", product.id)
+        );
+        const querySnapshot = await getDocs(q);
+        setIsInWishlist(!querySnapshot.empty);
+      } catch (error) {
+        console.error("Error checking wishlist status:", error);
+      }
+    };
+
+    checkWishlistStatus();
+  }, [user, product]);
+
   if (!product) {
     return null;
   }
 
   const { id, name, image_url, price, weight, flavor_profile = [] } = product;
-
-  useEffect(() => {
-    if (user) {
-      const checkWishlistStatus = async () => {
-        const q = query(
-          collection(db, "wishlist"),
-          where("userId", "==", user.uid),
-          where("productId", "==", id)
-        );
-        const querySnapshot = await getDocs(q);
-        setIsInWishlist(!querySnapshot.empty);
-      };
-      checkWishlistStatus();
-    } else {
-      setIsInWishlist(false);
-    }
-  }, [user, id]);
 
   const handleHeartClick = async (e) => {
     e.preventDefault();
@@ -169,12 +172,14 @@ export default function ProductCard({ product }) {
             <button
               onClick={handleHeartClick}
               className="p-2 rounded-full transition-colors duration-300 hover:bg-gray-100"
-              aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+              aria-label={
+                isInWishlist ? "Remove from wishlist" : "Add to wishlist"
+              }
             >
               <svg
                 className={`h-6 w-6 transition-colors duration-300 ${
-                  isInWishlist 
-                    ? "text-red-500 fill-red-500" 
+                  isInWishlist
+                    ? "text-red-500 fill-red-500"
                     : "text-gray-400 hover:text-red-500"
                 }`}
                 viewBox="0 0 24 24"
