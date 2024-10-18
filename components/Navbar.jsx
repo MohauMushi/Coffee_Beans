@@ -178,7 +178,7 @@ const Navbar = () => {
                 width={100}
                 height={100}
                 src="/coffee&beans.svg"
-                className="h-8"
+                className="h-8 w-12"
                 alt="FluxStore Logo"
               />
               <span className="self-center text-2xl font-semibold whitespace-nowrap text-black">
