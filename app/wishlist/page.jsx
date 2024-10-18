@@ -178,17 +178,17 @@ export default function WishlistPage() {
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{item.name}</h2>
                 <p className="text-gray-600 mb-4">${item.price.toFixed(2)}</p>
-                <div className="p-4 flex justify-between m-2 rounded-lg shadow-inner">
+                <div className="p-4 flex flex-col sm:flex-row justify-between gap-4 m-2 rounded-lg shadow-inner">
                   <button
                     onClick={() => removeFromWishlist(item.id)}
-                    className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                    className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors w-full sm:w-auto"
                   >
                     <Trash2 size={16} className="mr-2" />
                     Remove from Wishlist
                   </button>
                   <button
                     onClick={() => handleAddToCart(item)}
-                    className="flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-colors duration-300"
+                    className="flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded transition-colors w-full sm:w-auto"
                   >
                     <ShoppingCart size={16} className="mr-2" />
                     Add to Cart
