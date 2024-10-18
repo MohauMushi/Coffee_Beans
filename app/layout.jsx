@@ -1,6 +1,7 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { UserProvider } from "./context/UserContext";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Coffee & Beans",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
       <body>
         <Navbar />
         <UserProvider>{children}</UserProvider>
+        <Footer />
       </body>
     </html>
   );
