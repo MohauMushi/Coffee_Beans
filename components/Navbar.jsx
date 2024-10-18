@@ -234,17 +234,6 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <Link
-              href="/wishlist"
-              className="p-2 text-black rounded-md hover:bg-gray-100 focus:outline-none mr-2 relative"
-            >
-              <Heart size={24} />
-              {wishlistCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
             <button
               onClick={() => setIsCartOpen(true)}
               className="p-2 text-black rounded-md hover:bg-gray-100 focus:outline-none mr-2 relative"
@@ -313,6 +302,17 @@ const Navbar = () => {
             className="text-black hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
           >
             Contact
+          </Link>
+          <Link
+            href="/wishlist"
+            className="text-black hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+          >
+            Wishlist
+            {wishlistCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                {wishlistCount}
+              </span>
+            )}
           </Link>
           {user ? (
             <>
