@@ -9,9 +9,9 @@ export const metadata = {
     "A curated selection of premium coffee beans from around the world",
   icons: {
     icon: [
-      { url: "/public/favicon.ico", sizes: "any" },
-      { url: "/public/favicon-48x48.png", sizes: "48x48", type: "image/png" },
-      { url: "/public/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
     shortcut: "/favicon.ico",
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
