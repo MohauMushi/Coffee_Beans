@@ -139,11 +139,21 @@ const AccountPage = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div
+          className="animate-pulse bg-gray-200 h-96 w-full max-w-md rounded-lg"
+          aria-hidden="true"
+        ></div>
+      </div>
+    );
+  }
+
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Alert
         message={alert.message}
         type={alert.type}
