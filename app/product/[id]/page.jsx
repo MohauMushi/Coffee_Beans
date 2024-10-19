@@ -101,7 +101,54 @@ export default function ProductDetails({ params }) {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl animate-pulse">
+          {/* Image skeleton */}
+          <div className="relative">
+            <div className="h-[25rem] w-full bg-gray-200 rounded-lg"></div>
+          </div>
+
+          {/* Content skeleton */}
+          <div className="space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+
+            {/* Flavor profile skeleton */}
+            <div className="space-y-2">
+              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+              <div className="flex gap-2">
+                <div className="h-8 bg-gray-200 rounded-full w-20"></div>
+                <div className="h-8 bg-gray-200 rounded-full w-20"></div>
+                <div className="h-8 bg-gray-200 rounded-full w-20"></div>
+              </div>
+            </div>
+
+            {/* Grind options skeleton */}
+            <div className="space-y-2">
+              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+              <div className="flex gap-2">
+                <div className="h-8 bg-gray-200 rounded-full w-24"></div>
+                <div className="h-8 bg-gray-200 rounded-full w-24"></div>
+                <div className="h-8 bg-gray-200 rounded-full w-24"></div>
+              </div>
+            </div>
+
+            {/* Button skeleton */}
+            <div className="h-12 bg-gray-200 rounded-md w-40 mt-6"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <div>Error: {error}</div>;
   if (!product) return <div>Product not found</div>;
 
