@@ -166,70 +166,83 @@ export default function ProductCard({ product }) {
           setAlertConfig((prev) => ({ ...prev, isVisible: false }))
         }
       />
-      <div className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
-        <Link href={`/product/${id}`} className="block relative">
-          <div className="absolute top-2 right-2 rounded-full z-10 bg-slate-50">
-            <button
-              onClick={handleHeartClick}
-              className="p-2 rounded-full transition-colors duration-300 hover:bg-gray-100"
-              aria-label={
-                isInWishlist ? "Remove from wishlist" : "Add to wishlist"
-              }
-            >
-              <svg
-                className={`h-6 w-6 transition-colors duration-300 ${
-                  isInWishlist
-                    ? "text-red-500 fill-red-500"
-                    : "text-gray-400 hover:text-red-500"
-                }`}
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={isInWishlist ? "0" : "2"}
-                fill={isInWishlist ? "currentColor" : "none"}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col h-full">
+        <Link href={`/product/${id}`} className="flex-1">
+          <div className="relative">
+            {/* Wishlist button */}
+            <div className="absolute top-2 right-2 z-10">
+              <button
+                onClick={handleHeartClick}
+                className="p-2 rounded-full transition-colors duration-300 bg-white/80 backdrop-blur-sm hover:bg-white"
+                aria-label={
+                  isInWishlist ? "Remove from wishlist" : "Add to wishlist"
+                }
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                />
-              </svg>
-            </button>
-          </div>
-          <div className="relative h-64 shadow-inner m-2 rounded">
-            <Image
-              src={image_url}
-              alt={name || "Product image"}
-              width={300}
-              height={300}
-              className="flex justify-center items-center transition-transform duration-300 object-contain hover:scale-105"
-            />
-          </div>
-          <div className="p-4">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2 line-clamp-1">
-              {name || "Unnamed Product"}
-            </h2>
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-gray-900">
-                ${(price || 0).toFixed(2)}
-              </span>
-              <span className="text-sm text-gray-500">{weight || "N/A"}g</span>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {flavor_profile.map((flavor, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                <svg
+                  className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-300 ${
+                    isInWishlist
+                      ? "text-red-500 fill-red-500"
+                      : "text-gray-400 hover:text-red-500"
+                  }`}
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={isInWishlist ? "0" : "2"}
+                  fill={isInWishlist ? "currentColor" : "none"}
                 >
-                  {flavor}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Product Image */}
+            <div className="relative h-40 sm:h-48 md:h-52 lg:h-56 shadow-inner m-2 rounded">
+              <Image
+                src={image_url}
+                alt={name || "Product image"}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-contain transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+
+            {/* Product Info */}
+            <div className="p-3 sm:p-4">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 line-clamp-1">
+                {name || "Unnamed Product"}
+              </h2>
+
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-base sm:text-lg font-bold text-gray-900">
+                  ${(price || 0).toFixed(2)}
                 </span>
-              ))}
+                <span className="text-xs sm:text-sm text-gray-500">
+                  {weight || "N/A"}g
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {flavor_profile.map((flavor, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-xs rounded-full whitespace-nowrap"
+                  >
+                    {flavor}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </Link>
-        <div className="p-4 flex justify-end m-2 rounded-lg shadow-inner">
+
+        {/* Add to Cart Button */}
+        <div className="p-3 sm:p-4 mt-auto m-2 rounded-lg shadow-inner">
           <button
             onClick={handleAddToCart}
-            className="flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-colors duration-300"
+            className="w-full flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-colors duration-300"
           >
             <ShoppingCart size={16} className="mr-2" />
             Add to Cart
